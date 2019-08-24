@@ -1,7 +1,16 @@
 Ticker2
--------
+=======
 
 This is a much simpler version of the ticker script, it does however use HTML to render the images which is a lot less efficient but much more configurable. It gathers all required data in a maximum of 2 API calls (often 1 call as FX data can be cached)
+
+Setup
+-----
+
+```sh
+cp .env.example .env
+```
+
+You need to set all of the variables e.g. reddit tokens, openexchangerate token, subreddit to target etc.
 
 Building (option 1)
 -------------------
