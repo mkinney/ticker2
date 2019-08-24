@@ -1,9 +1,10 @@
+""" ticker2 - provide price information for https://old.reddit.com/r/ethfinance/
+"""
 import logging
 import os
 
 import httpx
 import praw
-import uvicorn
 
 from aiocache import cached, Cache
 from pyppeteer import launch
@@ -26,20 +27,22 @@ subreddit = reddit.subreddit(os.getenv('subreddit'))
 
 
 @app.route("/screenshot")
-async def screenshot(request):
+async def screenshot():
+    """ take a screenshot """
     task = BackgroundTask(generate_and_upload_images)
     return JSONResponse({'status': 'ok'}, background=task)
 
 
 async def generate_and_upload_images():
+    """ generate and upload the image """
     browser = await launch(
         headless=True,
         args=['--no-sandbox', '--disable-setuid-sandbox'])
     page = await browser.newPage()
     await page.goto("http://localhost")
     await page.setViewport({'height': 800, 'width': 1680})
-    clip1 = {'x':0,'y':0,'height':19,'width':1680}
-    clip2 = {'x':0,'y':19,'height':19,'width':1680}
+    clip1 = {'x':0, 'y':0, 'height':19, 'width':1680}
+    clip2 = {'x':0, 'y':19, 'height':19, 'width':1680}
     await page.screenshot({"path": "output/upper-ticker.png", "clip": clip1})
     await page.screenshot({"path": "output/lower-ticker.png", "clip": clip2})
     await browser.close()
@@ -50,6 +53,7 @@ async def generate_and_upload_images():
 
 
 async def get_fx():
+    """ get the live exchange rates """
     logger.info("Fetching live FX")
     resp = await client.get(
         f"https://openexchangerates.org/api/latest.json?app_id={os.getenv('oer')}"
@@ -60,16 +64,18 @@ async def get_fx():
 
 
 async def get_omc():
+    """ get the latest market prices """
     logger.info("Fetching live OMC")
     resp = await client.get("http://api.openmarketcap.com/api/v1/tokens?size=300")
     if resp.status_code != 200:
         raise Exception(f"OMC HTTP {resp.status_code}")
-    logger.info(f"Total records: {resp.json()['records_total']}")
+    logger.info("Total records: %s", resp.json()['records_total'])
     return {item["global_id"]: item for item in resp.json()["data"]}
 
 
 @cached(ttl=299, cache=Cache.MEMORY, key="get_data", namespace="main")
 async def get_data():
+    """ process the omc data """
     fx_data = await get_fx()
     omc_data = await get_omc()
     return {
@@ -105,5 +111,6 @@ async def get_data():
 
 @app.route("/")
 async def index(request):
+    """ main route """
     data = await get_data()
     return templates.TemplateResponse("index.html", {"request": request, "data": data})

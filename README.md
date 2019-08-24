@@ -38,3 +38,19 @@ You can optionally mount the output volume so you can see what is going on, run 
 ```sh
 docker run -d -v /full/path/to/output/dir:/app/output/ --env-file .env --name ticker2 -p 80:80 ethfinance/ticker2
 ```
+
+Developing
+----------
+Create a virtual environment
+
+```sh
+virtualenv -p python3 venv
+source venv/bin/activate
+pip install -r requirements.txt
+```
+
+Ensure the code is up to standards
+```sh
+pylint app/
+```
+
