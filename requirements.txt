@@ -1,0 +1,6 @@
+aiocache
+aiofiles
+httpx
+jinja2
+praw
+pyppeteer
