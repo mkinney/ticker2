@@ -26,6 +26,13 @@ Pulling (option 2)
 docker pull ethfinance/ticker2
 ```
 
+Developing
+----------
+
+```sh
+docker run -d --env-file .env --name ticker2 -v $(pwd)/app:/app -p 80:80 ethfinance/ticker2 /start-reload.sh
+```
+
 Running
 -------
 
