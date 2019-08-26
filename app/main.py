@@ -22,30 +22,30 @@ app = Starlette(debug=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 client = httpx.AsyncClient()
 reddit = praw.Reddit(user_agent="EFT - v1.0.0")
-subreddit = reddit.subreddit(os.getenv('subreddit'))
+subreddit = reddit.subreddit(os.getenv("subreddit"))
 
 
 @app.route("/screenshot")
 async def screenshot(request):
     task = BackgroundTask(generate_and_upload_images)
-    return JSONResponse({'status': 'ok'}, background=task)
+    return JSONResponse({"status": "ok"}, background=task)
 
 
 async def generate_and_upload_images():
     browser = await launch(
-        headless=True,
-        args=['--no-sandbox', '--disable-setuid-sandbox'])
+        headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"]
+    )
     page = await browser.newPage()
     await page.goto("http://localhost")
-    await page.setViewport({'height': 800, 'width': 1680})
-    clip1 = {'x':0,'y':0,'height':19,'width':1680}
-    clip2 = {'x':0,'y':19,'height':19,'width':1680}
+    await page.setViewport({"height": 800, "width": 1680})
+    clip1 = {"x": 0, "y": 0, "height": 19, "width": 1680}
+    clip2 = {"x": 0, "y": 19, "height": 19, "width": 1680}
     await page.screenshot({"path": "output/upper-ticker.png", "clip": clip1})
     await page.screenshot({"path": "output/lower-ticker.png", "clip": clip2})
     await browser.close()
     subreddit.stylesheet.upload("upper-ticker-test", "output/upper-ticker.png")
     subreddit.stylesheet.upload("lower-ticker-test", "output/lower-ticker.png")
-    logger.info('Ticker image generated and uploaded, check for errors above.')
+    logger.info("Ticker image generated and uploaded, check for errors above.")
     return True
 
 
@@ -85,20 +85,20 @@ async def get_data():
             "rub": "₽%.2f" % (float(omc_data["eth"]["price_usd"]) * fx_data["RUB"]),
         },
         "erc20": {
-            "ant":  "%.2f" % (float(omc_data["ant"]["price_usd"])),
-            "bat":  "%.2f" % (float(omc_data["bat_1"]["price_usd"])),
-            "dai":  "%.2f" % (float(omc_data["dai"]["price_usd"])),
-            "gno":  "%.2f" % (float(omc_data["gno"]["price_usd"])),
-            "gnt":  "%.2f" % (float(omc_data["gnt"]["price_usd"])),
+            "ant": "%.2f" % (float(omc_data["ant"]["price_usd"])),
+            "bat": "%.2f" % (float(omc_data["bat_1"]["price_usd"])),
+            "dai": "%.2f" % (float(omc_data["dai"]["price_usd"])),
+            "gno": "%.2f" % (float(omc_data["gno"]["price_usd"])),
+            "gnt": "%.2f" % (float(omc_data["gnt"]["price_usd"])),
             "link": "%.2f" % (float(omc_data["link"]["price_usd"])),
             "loom": "%.2f" % (float(omc_data["loom"]["price_usd"])),
-            "mkr":  "%.2f" % (float(omc_data["mkr"]["price_usd"])),
-            "omg":  "%.2f" % (float(omc_data["omg"]["price_usd"])),
-            "poa":  "%.2f" % (float(omc_data["poa"]["price_usd"])),
-            "rep":  "%.2f" % (float(omc_data["rep"]["price_usd"])),
-            "storj":"%.2f" % (float(omc_data["storj"]["price_usd"])),
-            "snt":  "%.2f" % (float(omc_data["snt"]["price_usd"])),
-            "zrx":  "%.2f" % (float(omc_data["zrx"]["price_usd"])),
+            "mkr": "%.2f" % (float(omc_data["mkr"]["price_usd"])),
+            "omg": "%.2f" % (float(omc_data["omg"]["price_usd"])),
+            "poa": "%.2f" % (float(omc_data["poa"]["price_usd"])),
+            "rep": "%.2f" % (float(omc_data["rep"]["price_usd"])),
+            "storj": "%.2f" % (float(omc_data["storj"]["price_usd"])),
+            "snt": "%.2f" % (float(omc_data["snt"]["price_usd"])),
+            "zrx": "%.2f" % (float(omc_data["zrx"]["price_usd"])),
         },
     }
 
