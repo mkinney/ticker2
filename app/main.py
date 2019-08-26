@@ -10,8 +10,8 @@ from pyppeteer import launch
 from starlette.applications import Starlette
 from starlette.background import BackgroundTask
 from starlette.responses import JSONResponse
-from starlette.templating import Jinja2Templates
 from starlette.staticfiles import StaticFiles
+from starlette.templating import Jinja2Templates
 
 logger = logging.getLogger()
 logger.setLevel(logging.INFO)
