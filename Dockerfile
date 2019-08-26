@@ -1,6 +1,9 @@
-FROM tiangolo/uvicorn-gunicorn-starlette:python3.7
-RUN apt-get update -y && apt-get install -y libasound2 libatk-bridge2.0-0 libgtk-3-0 libnss3 libxtst-dev xvfb
+FROM alpine:edge
+RUN apk add --no-cache chromium nss freetype freetype-dev harfbuzz ttf-freefont python3
+RUN apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev alpine-sdk
 COPY ./requirements.txt /requirements.txt
-RUN pip install -r /requirements.txt
-RUN pyppeteer-install
+RUN pip3 install --upgrade pip && pip3 install -r requirements.txt && apk del .build-deps
 COPY ./app /app
+WORKDIR /app
+EXPOSE 80
+ENTRYPOINT uvicorn main:app --host 0.0.0.0 --port 80
