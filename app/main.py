@@ -1,3 +1,4 @@
+import asyncio
 import logging
 import os
 
@@ -8,52 +9,43 @@ import uvicorn
 from aiocache import cached, Cache
 from pyppeteer import launch
 from starlette.applications import Starlette
-from starlette.background import BackgroundTask
-from starlette.responses import JSONResponse
 from starlette.staticfiles import StaticFiles
 from starlette.templating import Jinja2Templates
-
-logger = logging.getLogger()
-logger.setLevel(logging.INFO)
-
-templates = Jinja2Templates(directory="templates")
 
 app = Starlette(debug=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
 client = httpx.AsyncClient()
+logger = logging.getLogger()
 reddit = praw.Reddit(user_agent="EFT - v1.0.0")
 subreddit = reddit.subreddit(os.getenv("subreddit"))
+templates = Jinja2Templates(directory="templates")
 
 
-@app.route("/screenshot")
-async def screenshot(request):
-    task = BackgroundTask(generate_and_upload_images)
-    return JSONResponse({"status": "ok"}, background=task)
+async def generate_and_upload_images(refresh_interval):
+    while True:
+        args = ["--no-sandbox", "--disable-setuid-sandbox"]
+        browser = await launch(headless=True, args=args)
+        page = await browser.newPage()
+        await page.goto("http://localhost")
+        await page.setViewport({"height": 800, "width": 1680})
+        clip1 = {"x": 0, "y": 0, "height": 19, "width": 1680}
+        clip2 = {"x": 0, "y": 19, "height": 19, "width": 1680}
+        await page.screenshot({"path": "output/upper-ticker.png", "clip": clip1})
+        await page.screenshot({"path": "output/lower-ticker.png", "clip": clip2})
+        await browser.close()
+        subreddit.stylesheet.upload("upper-ticker", "output/upper-ticker.png")
+        subreddit.stylesheet.upload("lower-ticker", "output/lower-ticker.png")
+        logger.info("Ticker image generated & uploaded, check output above.")
+        await asyncio.sleep(refresh_interval)
 
 
-async def generate_and_upload_images():
-    browser = await launch(
-        headless=True, args=["--no-sandbox", "--disable-setuid-sandbox"]
-    )
-    page = await browser.newPage()
-    await page.goto("http://localhost")
-    await page.setViewport({"height": 800, "width": 1680})
-    clip1 = {"x": 0, "y": 0, "height": 19, "width": 1680}
-    clip2 = {"x": 0, "y": 19, "height": 19, "width": 1680}
-    await page.screenshot({"path": "output/upper-ticker.png", "clip": clip1})
-    await page.screenshot({"path": "output/lower-ticker.png", "clip": clip2})
-    await browser.close()
-    subreddit.stylesheet.upload("upper-ticker-test", "output/upper-ticker.png")
-    subreddit.stylesheet.upload("lower-ticker-test", "output/lower-ticker.png")
-    logger.info("Ticker image generated and uploaded, check for errors above.")
-    return True
+app.add_event_handler("startup", asyncio.create_task(generate_and_upload_images(300)))
 
 
 async def get_fx():
     logger.info("Fetching live FX")
-    resp = await client.get(
-        f"https://openexchangerates.org/api/latest.json?app_id={os.getenv('oer')}"
-    )
+    url = f"https://openexchangerates.org/api/latest.json?app_id={os.getenv('oer')}"
+    resp = await client.get(url)
     if resp.status_code != 200:
         raise Exception(f"FX HTTP {resp.status_code}")
     return resp.json()["rates"]
@@ -68,7 +60,7 @@ async def get_omc():
     return {item["global_id"]: item for item in resp.json()["data"]}
 
 
-@cached(ttl=299, cache=Cache.MEMORY, key="get_data", namespace="main")
+@cached(ttl=297, cache=Cache.MEMORY, key="get_data", namespace="main")
 async def get_data():
     fx_data = await get_fx()
     omc_data = await get_omc()
