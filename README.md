@@ -40,8 +40,8 @@ Running
 docker run -d --env-file .env --name ticker2 -p 80:80 ethfinance/ticker2
 ```
 
-You can optionally mount the output volume so you can see what is going on, run this command instead:
+You can optionally mount the out volume so you can see what is going on, run this command instead:
 
 ```sh
-docker run -d -v /full/path/to/output/dir:/app/output/ --env-file .env --name ticker2 -p 80:80 ethfinance/ticker2
+docker run -d -v /full/path/to/out/dir:/app/out/ --env-file .env --name ticker2 -p 80:80 ethfinance/ticker2
 ```

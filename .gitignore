@@ -130,4 +130,4 @@ dmypy.json
 .vscode/
 
 # App specific
-output/
+out/

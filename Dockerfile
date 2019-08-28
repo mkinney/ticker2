@@ -1,5 +1,7 @@
 FROM alpine:edge
-RUN apk add --no-cache chromium nss freetype freetype-dev harfbuzz ttf-freefont python3
+RUN apk add --no-cache chromium nss freetype freetype-dev harfbuzz ttf-freefont msttcorefonts-installer fontconfig python3 && \
+    update-ms-fonts && \
+    fc-cache -f
 RUN apk add --no-cache --virtual .build-deps gcc python3-dev musl-dev alpine-sdk
 COPY ./requirements.txt /requirements.txt
 RUN pip3 install --upgrade pip && pip3 install -r requirements.txt && apk del .build-deps

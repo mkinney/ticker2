@@ -1,22 +1,19 @@
 <head>
     <style>
-        body {
-            font-size: 12px;
-            margin: 0;
-        }
+        body {margin: 0;}
         ul {
             padding: 0;
             margin: 0;
             display: flex;
-            opacity: 0.65;
 	        text-align: center;
-            background-color: whitesmoke;
         }   
         ul li {
+            color: white;
             list-style-type:none;
             padding:2px;
             width:100%;
             font-family: Calibri, sans-serif;
+            font-size: 12px;
             -webkit-font-smoothing: antialiased;
         }
         ul li img {
@@ -28,13 +25,9 @@
     <ul class="ticker upper-ticker">
         <li>Vol: {{ data.vol }}</li>
         <li>Supply: {{ data.supply }}</li>
-        {% for key, value in data.fiat.items() %}
-            <li><img src="/static/img/flags/{{ key[:2] }}.svg"  /> {{ key|upper|safe}}: {{ value }}</li>
-        {% endfor %}
+        {% for key, value in data.fiat.items() %}<li><img src="/static/img/flags/{{ key[:2] }}.svg"  /> {{ key|upper|safe}}: {{ value }}</li>{% endfor %}
     </ul>
     <ul class="ticker lower-ticker">
-        {% for key, value in data.erc20.items() %}
-            <li><img src="/static/img/crypto/{{ key }}.svg"/> {{ key|upper }}: ${{ value }}</li>
-        {% endfor %}
+        {% for key, value in data.erc20.items() %}<li><img src="/static/img/crypto/{{ key }}.svg"/> {{ key|upper }}: ${{ value }}</li>{% endfor %}
     </ul>
 </body>
