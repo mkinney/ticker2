@@ -25,7 +25,7 @@ templates = Jinja2Templates(directory="templates")
 async def generate_and_upload_images(refresh_interval=300):
     while True:  # TODO: only generate images if any price changed since last update
         args = ["--no-sandbox", "--disable-setuid-sandbox"]
-        browser = await launch(args=args, headless=True, executablePath=chrome_path)
+        browser = await launch(args=args, headless=True, executablePath=chrome_path, autoClose=False)
         page = await browser.newPage()
         resp = await page.goto("http://localhost")
         await page.setViewport({"height": 800, "width": 1680})

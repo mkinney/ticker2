@@ -1,0 +1,16 @@
+version: '3'
+services:
+  ticker2:
+    container_name: ticker2
+    image: ethfinance/ticker2
+    restart: always
+    volumes:
+        - /home/bu/ticker2/out:/app/out/
+    env_file:
+      - .env
+
+  watchtower:
+    container_name: watchtower
+    image: containrrr/watchtower
+    volumes:
+      - '/var/run/docker.sock:/var/run/docker.sock'
