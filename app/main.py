@@ -14,7 +14,7 @@ from starlette.templating import Jinja2Templates
 
 app = Starlette(debug=True)
 app.mount("/static", StaticFiles(directory="static"), name="static")
-chrome_path = "/usr/bin/chromium-browser"
+cpath = "/usr/bin/chromium-browser"
 client = httpx.AsyncClient()
 log = logging.getLogger()
 reddit = praw.Reddit(user_agent="EFT - v1.0.0")
@@ -23,10 +23,10 @@ templates = Jinja2Templates(directory="templates")
 
 
 async def generate_and_upload_images(refresh_interval=300):
+    args = ["--no-sandbox", "--disable-setuid-sandbox"]
+    chrome = await launch(args=args, headless=True, executablePath=cpath, autoClose=False)
+    page = await chrome.newPage()
     while True:  # TODO: only generate images if any price changed since last update
-        args = ["--no-sandbox", "--disable-setuid-sandbox"]
-        browser = await launch(args=args, headless=True, executablePath=chrome_path, autoClose=False)
-        page = await browser.newPage()
         resp = await page.goto("http://localhost")
         await page.setViewport({"height": 800, "width": 1680})
         clip1 = {"x": 0, "y": 0, "height": 19, "width": 1680}
@@ -41,8 +41,8 @@ async def generate_and_upload_images(refresh_interval=300):
             )
             log.info(f"Generated {name}, uploading to Reddit.")
             log.info(sub.stylesheet.upload(name, f"out/{name}.png"))  # TODO: blocks
-        await browser.close()
         await asyncio.sleep(refresh_interval)
+    await chrome.close()
 
 
 async def get_fx():
